@@ -18,7 +18,7 @@ https://developer.woocommerce.com/docs/extensions/settings-and-config/settings-u
 ## Requirements
 
 - WordPress with WooCommerce active.
-- A WooCommerce version that includes `Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter`.
+- WooCommerce 10.9 or newer.
 - PHP 7.4 or newer.
 - Node 24.15.0, as defined in `.nvmrc`.
 - Composer for PHP linting dependencies.
