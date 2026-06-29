@@ -165,6 +165,16 @@ class WSUID_Settings_Page extends WC_Settings_Page {
 				'type'    => 'checkbox',
 			),
 			array(
+				'type' => 'sectionend',
+				'id'   => 'wsuid_demo_options',
+			),
+			array(
+				'title' => __( 'Example fields', 'woo-settings-ui-demo' ),
+				'type'  => 'title',
+				'desc'  => __( 'These fields use the same option IDs and save flow in both renderers.', 'woo-settings-ui-demo' ),
+				'id'    => 'wsuid_demo_fields',
+			),
+			array(
 				'title'       => __( 'Storefront message', 'woo-settings-ui-demo' ),
 				'desc'        => __( 'A plain text option rendered by native controls in both modes.', 'woo-settings-ui-demo' ),
 				'id'          => 'wsuid_storefront_message',
@@ -220,7 +230,7 @@ class WSUID_Settings_Page extends WC_Settings_Page {
 			),
 			array(
 				'type' => 'sectionend',
-				'id'   => 'wsuid_demo_options',
+				'id'   => 'wsuid_demo_fields',
 			),
 			array(
 				'title' => __( 'Diagnostics', 'woo-settings-ui-demo' ),
