@@ -23,6 +23,8 @@ class WSUID_Settings_Page_Adapter extends \Automattic\WooCommerce\Admin\Settings
 	public function get_schema( string $section ): array {
 		$schema = parent::get_schema( $section );
 
+		$schema = $this->normalize_channel_picker_schema( $schema );
+
 		$schema['shell']['subtitle'] = __( 'Toggle WooCommerce Settings UI rendering and compare native fields across both renderers.', 'woo-settings-ui-demo' );
 		$schema['shell']['badges']   = array(
 			array(
@@ -30,6 +32,40 @@ class WSUID_Settings_Page_Adapter extends \Automattic\WooCommerce\Admin\Settings
 				'intent' => 'success',
 			),
 		);
+
+		return $schema;
+	}
+
+	/**
+	 * Convert the legacy custom field type into the canonical Settings UI array type.
+	 *
+	 * @param array<mixed> $schema Settings UI schema.
+	 * @return array<mixed>
+	 */
+	private function normalize_channel_picker_schema( array $schema ): array {
+		if ( ! isset( $schema['groups'] ) || ! is_array( $schema['groups'] ) ) {
+			return $schema;
+		}
+
+		foreach ( $schema['groups'] as &$group ) {
+			if ( ! isset( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+				continue;
+			}
+
+			foreach ( $group['fields'] as &$field ) {
+				if ( ! is_array( $field ) || 'wsuid_notification_channels' !== ( $field['id'] ?? '' ) ) {
+					continue;
+				}
+
+				$field['type']      = 'array';
+				$field['component'] = 'woo-settings-ui-demo/channel-picker';
+				$field['value']     = isset( $field['value'] ) && is_array( $field['value'] )
+					? array_values( $field['value'] )
+					: array();
+			}
+		}
+
+		unset( $group, $field );
 
 		return $schema;
 	}

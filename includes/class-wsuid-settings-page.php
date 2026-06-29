@@ -23,6 +23,9 @@ class WSUID_Settings_Page extends WC_Settings_Page {
 		$this->icon  = 'admin-customizer';
 
 		parent::__construct();
+
+		add_action( 'woocommerce_admin_field_wsuid_channel_picker', array( $this, 'output_channel_picker_field' ) );
+		add_filter( 'woocommerce_admin_settings_sanitize_option_wsuid_notification_channels', array( $this, 'sanitize_channel_picker_option' ), 10, 3 );
 	}
 
 	/**
@@ -34,6 +37,96 @@ class WSUID_Settings_Page extends WC_Settings_Page {
 	 */
 	public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
 		return new WSUID_Settings_Page_Adapter( $this );
+	}
+
+	/**
+	 * Render the custom channel picker field in the legacy settings table.
+	 *
+	 * @param array<mixed> $value Field definition.
+	 */
+	public function output_channel_picker_field( array $value ): void {
+		$field_description = WC_Admin_Settings::get_field_description( $value );
+		$selected_values   = $this->sanitize_channel_picker_option( array(), $value, $value['value'] ?? array() );
+		$field_id          = isset( $value['id'] ) ? (string) $value['id'] : '';
+		$field_name        = isset( $value['field_name'] ) ? (string) $value['field_name'] : $field_id;
+		$field_title       = isset( $value['title'] ) ? (string) $value['title'] : '';
+		$field_options     = isset( $value['options'] ) && is_array( $value['options'] ) ? $value['options'] : array();
+		$row_class         = isset( $value['row_class'] ) ? (string) $value['row_class'] : '';
+		$description       = isset( $field_description['description'] ) ? (string) $field_description['description'] : '';
+		$tooltip_html      = isset( $field_description['tooltip_html'] ) ? (string) $field_description['tooltip_html'] : '';
+		$first_option_id   = '';
+
+		if ( array() !== $field_options ) {
+			$first_option_id = $field_id . '_' . sanitize_key( (string) array_key_first( $field_options ) );
+		}
+		?>
+		<tr class="<?php echo esc_attr( $row_class ); ?>">
+			<th scope="row" class="titledesc">
+				<label for="<?php echo esc_attr( $first_option_id ? $first_option_id : $field_id ); ?>">
+					<?php echo esc_html( $field_title ); ?> <?php echo $tooltip_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WooCommerce formats setting tooltip HTML. ?>
+				</label>
+			</th>
+			<td class="forminp forminp-wsuid-channel-picker">
+				<fieldset>
+					<legend class="screen-reader-text"><span><?php echo esc_html( $field_title ); ?></span></legend>
+					<div class="wsuid-channel-picker wsuid-channel-picker--legacy" role="group" aria-label="<?php echo esc_attr( $field_title ); ?>">
+						<?php
+						foreach ( $field_options as $option_value => $option_label ) {
+							$option_value = (string) $option_value;
+							$option_id    = $field_id . '_' . sanitize_key( $option_value );
+							$is_selected  = in_array( $option_value, $selected_values, true );
+							?>
+							<label class="wsuid-channel-picker__option<?php echo $is_selected ? ' is-selected' : ''; ?>" for="<?php echo esc_attr( $option_id ); ?>">
+								<input
+									id="<?php echo esc_attr( $option_id ); ?>"
+									name="<?php echo esc_attr( $field_name ); ?>[]"
+									type="checkbox"
+									value="<?php echo esc_attr( $option_value ); ?>"
+									class="wsuid-channel-picker__input"
+									<?php checked( $is_selected ); ?>
+								/>
+								<span class="wsuid-channel-picker__indicator" aria-hidden="true"></span>
+								<span class="wsuid-channel-picker__label"><?php echo esc_html( (string) $option_label ); ?></span>
+							</label>
+							<?php
+						}
+						?>
+					</div>
+					<?php echo wp_kses_post( $description ); ?>
+				</fieldset>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Sanitize selected notification channels for both renderers.
+	 *
+	 * @param mixed        $value     Prepared value from WooCommerce.
+	 * @param array<mixed> $option    Field definition.
+	 * @param mixed        $raw_value Raw submitted value.
+	 * @return string[]
+	 */
+	public function sanitize_channel_picker_option( $value, array $option, $raw_value ): array {
+		$allowed_values = isset( $option['options'] ) && is_array( $option['options'] )
+			? array_map( 'strval', array_keys( $option['options'] ) )
+			: array();
+		$posted_values  = array();
+		$clean_values   = array();
+
+		foreach ( (array) $raw_value as $posted_value ) {
+			if ( is_scalar( $posted_value ) ) {
+				$posted_values[] = (string) wc_clean( $posted_value );
+			}
+		}
+
+		foreach ( $allowed_values as $allowed_value ) {
+			if ( in_array( $allowed_value, $posted_values, true ) ) {
+				$clean_values[] = $allowed_value;
+			}
+		}
+
+		return $clean_values;
 	}
 
 	/**
@@ -113,9 +206,9 @@ class WSUID_Settings_Page extends WC_Settings_Page {
 			),
 			array(
 				'title'     => __( 'Notification channels', 'woo-settings-ui-demo' ),
-				'desc'      => __( 'Legacy mode renders this as a native multiselect. Settings UI mode renders the same saved option with a custom component.', 'woo-settings-ui-demo' ),
+				'desc'      => __( 'Legacy mode renders this as a custom PHP field. Settings UI mode renders the same saved option with a React component.', 'woo-settings-ui-demo' ),
 				'id'        => 'wsuid_notification_channels',
-				'type'      => 'multiselect',
+				'type'      => 'wsuid_channel_picker',
 				'default'   => array( 'email', 'dashboard' ),
 				'component' => 'woo-settings-ui-demo/channel-picker',
 				'options'   => array(
