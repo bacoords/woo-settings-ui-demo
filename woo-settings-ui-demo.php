@@ -28,7 +28,6 @@ require_once plugin_dir_path( WSUID_PLUGIN_FILE ) . 'includes/class-wsuid-assets
 add_filter( 'woocommerce_admin_features', 'wsuid_maybe_enable_settings_ui' );
 add_filter( 'woocommerce_get_settings_pages', 'wsuid_add_settings_page' );
 add_action( 'admin_enqueue_scripts', array( 'WSUID_Assets', 'register' ) );
-add_action( 'admin_notices', 'wsuid_maybe_show_woocommerce_missing_notice' );
 
 /**
  * Enable WooCommerce's experimental Settings UI feature when the demo setting is on.
@@ -69,18 +68,4 @@ function wsuid_add_settings_page( array $settings_pages ): array {
 	$settings_pages[] = new WSUID_Settings_Page();
 
 	return $settings_pages;
-}
-
-/**
- * Show a dependency notice if WooCommerce is not active.
- */
-function wsuid_maybe_show_woocommerce_missing_notice(): void {
-	if ( class_exists( 'WooCommerce' ) ) {
-		return;
-	}
-
-	printf(
-		'<div class="notice notice-error"><p>%s</p></div>',
-		esc_html__( 'Woo Settings UI Demo requires WooCommerce to be active.', 'woo-settings-ui-demo' )
-	);
 }
