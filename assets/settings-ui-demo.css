@@ -1,0 +1,78 @@
+.wsuid-channel-picker-control .components-base-control__field {
+	margin-bottom: 0;
+}
+
+.wsuid-channel-picker {
+	display: grid;
+	grid-template-columns: repeat( auto-fit, minmax( 160px, 1fr ) );
+	gap: 10px;
+	max-width: 720px;
+}
+
+.wsuid-channel-picker__option {
+	align-items: center;
+	appearance: none;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	box-shadow: none;
+	color: #1d2327;
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	gap: 10px;
+	min-height: 44px;
+	padding: 10px 12px;
+	text-align: left;
+	transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.wsuid-channel-picker__option:hover {
+	border-color: #2271b1;
+}
+
+.wsuid-channel-picker__option:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+	outline: 2px solid transparent;
+}
+
+.wsuid-channel-picker__option.is-selected {
+	background: #f0f6fc;
+	border-color: #2271b1;
+}
+
+.wsuid-channel-picker__indicator {
+	border: 2px solid #8c8f94;
+	border-radius: 999px;
+	display: inline-block;
+	flex: 0 0 auto;
+	height: 14px;
+	position: relative;
+	width: 14px;
+}
+
+.wsuid-channel-picker__option.is-selected .wsuid-channel-picker__indicator {
+	background: #2271b1;
+	border-color: #2271b1;
+}
+
+.wsuid-channel-picker__option.is-selected .wsuid-channel-picker__indicator::after {
+	background: #fff;
+	border-radius: 999px;
+	content: "";
+	height: 6px;
+	left: 4px;
+	position: absolute;
+	top: 4px;
+	width: 6px;
+}
+
+.wsuid-channel-picker__label {
+	font-weight: 500;
+}
+
+.wsuid-channel-picker__summary {
+	color: #646970;
+	margin: 8px 0 0;
+}

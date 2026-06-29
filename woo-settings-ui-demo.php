@@ -21,9 +21,12 @@ define( 'WSUID_PLUGIN_FILE', __FILE__ );
 define( 'WSUID_TEXT_DOMAIN', 'woo-settings-ui-demo' );
 define( 'WSUID_PAGE_ID', 'settings_ui_demo' );
 define( 'WSUID_FEATURE_OPTION', 'wsuid_enable_settings_ui' );
+define( 'WSUID_SCRIPT_HANDLE', 'woo-settings-ui-demo-settings' );
+define( 'WSUID_STYLE_HANDLE', 'woo-settings-ui-demo-settings' );
 
 add_filter( 'woocommerce_admin_features', 'wsuid_maybe_enable_settings_ui' );
 add_filter( 'woocommerce_get_settings_pages', 'wsuid_add_settings_page' );
+add_action( 'admin_enqueue_scripts', 'wsuid_register_settings_ui_assets' );
 add_action( 'admin_notices', 'wsuid_maybe_show_woocommerce_missing_notice' );
 
 /**
@@ -95,6 +98,16 @@ function wsuid_declare_settings_page_classes(): void {
 			);
 
 			return $schema;
+		}
+
+		/**
+		 * Load the component registration script before the Settings UI app mounts.
+		 *
+		 * @param string $section Section id. Empty string means the default section.
+		 * @return string[]
+		 */
+		public function get_script_handles( string $section ): array {
+			return array( WSUID_SCRIPT_HANDLE );
 		}
 	}
 
@@ -212,12 +225,13 @@ function wsuid_get_demo_settings(): array {
 			),
 		),
 		array(
-			'title'   => __( 'Notification channels', WSUID_TEXT_DOMAIN ),
-			'desc'    => __( 'This starts as a native multiselect. The next demo step replaces it with a custom Settings UI component.', WSUID_TEXT_DOMAIN ),
-			'id'      => 'wsuid_notification_channels',
-			'type'    => 'multiselect',
-			'default' => array( 'email', 'dashboard' ),
-			'options' => array(
+			'title'     => __( 'Notification channels', WSUID_TEXT_DOMAIN ),
+			'desc'      => __( 'Legacy mode renders this as a native multiselect. Settings UI mode renders the same saved option with a custom component.', WSUID_TEXT_DOMAIN ),
+			'id'        => 'wsuid_notification_channels',
+			'type'      => 'multiselect',
+			'default'   => array( 'email', 'dashboard' ),
+			'component' => 'woo-settings-ui-demo/channel-picker',
+			'options'   => array(
 				'email'     => __( 'Email', WSUID_TEXT_DOMAIN ),
 				'dashboard' => __( 'Dashboard inbox', WSUID_TEXT_DOMAIN ),
 				'sms'       => __( 'SMS', WSUID_TEXT_DOMAIN ),
@@ -260,6 +274,47 @@ function wsuid_get_demo_settings(): array {
 			'id'   => 'wsuid_demo_diagnostics',
 		),
 	);
+}
+
+/**
+ * Register assets used by the Settings UI custom component.
+ */
+function wsuid_register_settings_ui_assets(): void {
+	$script_path = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.js';
+	$style_path  = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.css';
+
+	wp_register_script(
+		WSUID_SCRIPT_HANDLE,
+		plugins_url( 'assets/settings-ui-demo.js', WSUID_PLUGIN_FILE ),
+		array( 'wc-settings-ui', 'wp-components', 'wp-element', 'wp-i18n' ),
+		file_exists( $script_path ) ? (string) filemtime( $script_path ) : WSUID_VERSION,
+		true
+	);
+
+	wp_register_style(
+		WSUID_STYLE_HANDLE,
+		plugins_url( 'assets/settings-ui-demo.css', WSUID_PLUGIN_FILE ),
+		array(),
+		file_exists( $style_path ) ? (string) filemtime( $style_path ) : WSUID_VERSION
+	);
+
+	if ( wsuid_is_demo_settings_screen() ) {
+		wp_enqueue_style( WSUID_STYLE_HANDLE );
+	}
+}
+
+/**
+ * Determine whether the current admin request is the demo settings page.
+ */
+function wsuid_is_demo_settings_screen(): bool {
+	if ( ! is_admin() ) {
+		return false;
+	}
+
+	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+	$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+
+	return 'wc-settings' === $page && WSUID_PAGE_ID === $tab;
 }
 
 /**
