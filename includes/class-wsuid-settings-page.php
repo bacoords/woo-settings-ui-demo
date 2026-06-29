@@ -37,20 +37,11 @@ class WSUID_Settings_Page extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings for the default section.
+	 * Get settings for the default section used by both renderers.
 	 *
 	 * @return array<mixed>
 	 */
 	protected function get_settings_for_default_section() {
-		return $this->get_demo_settings();
-	}
-
-	/**
-	 * Build the demo settings array used by both the legacy renderer and Settings UI.
-	 *
-	 * @return array<mixed>
-	 */
-	private function get_demo_settings(): array {
 		$settings_ui_enabled = 'yes' === get_option( WSUID_FEATURE_OPTION, 'no' );
 		$status_label        = $settings_ui_enabled ? __( 'enabled', 'woo-settings-ui-demo' ) : __( 'disabled', 'woo-settings-ui-demo' );
 
