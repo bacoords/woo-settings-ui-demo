@@ -18,7 +18,6 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'WSUID_VERSION', '0.1.0' );
 define( 'WSUID_PLUGIN_FILE', __FILE__ );
-define( 'WSUID_TEXT_DOMAIN', 'woo-settings-ui-demo' );
 define( 'WSUID_PAGE_ID', 'settings_ui_demo' );
 define( 'WSUID_FEATURE_OPTION', 'wsuid_enable_settings_ui' );
 define( 'WSUID_SCRIPT_HANDLE', 'woo-settings-ui-demo-settings' );
@@ -62,7 +61,7 @@ function wsuid_add_settings_page( array $settings_pages ): array {
 
 	wsuid_declare_settings_page_classes();
 
-	$settings_pages[] = new WC_Settings_UI_Demo_Page();
+	$settings_pages[] = new WSUID_Settings_Page();
 
 	return $settings_pages;
 }
@@ -71,82 +70,12 @@ function wsuid_add_settings_page( array $settings_pages ): array {
  * Declare the WooCommerce settings page classes once WooCommerce has loaded.
  */
 function wsuid_declare_settings_page_classes(): void {
-	if ( class_exists( 'WC_Settings_UI_Demo_Page', false ) ) {
+	if ( class_exists( 'WSUID_Settings_Page', false ) ) {
 		return;
 	}
 
-	/**
-	 * Adds Settings UI shell metadata to the legacy adapter.
-	 */
-	class WC_Settings_UI_Demo_Page_Adapter extends \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter {
-
-		/**
-		 * Build the Settings UI schema for the current section.
-		 *
-		 * @param string $section Section id. Empty string means the default section.
-		 * @return array<mixed>
-		 */
-		public function get_schema( string $section ): array {
-			$schema = parent::get_schema( $section );
-
-			$schema['shell']['subtitle'] = __( 'Toggle WooCommerce Settings UI rendering and compare native fields across both renderers.', WSUID_TEXT_DOMAIN );
-			$schema['shell']['badges']   = array(
-				array(
-					'label'  => __( 'Settings UI active', WSUID_TEXT_DOMAIN ),
-					'intent' => 'success',
-				),
-			);
-
-			return $schema;
-		}
-
-		/**
-		 * Load the component registration script before the Settings UI app mounts.
-		 *
-		 * @param string $section Section id. Empty string means the default section.
-		 * @return string[]
-		 */
-		public function get_script_handles( string $section ): array {
-			return array( WSUID_SCRIPT_HANDLE );
-		}
-	}
-
-	/**
-	 * Demo settings tab.
-	 */
-	class WC_Settings_UI_Demo_Page extends WC_Settings_Page {
-
-		/**
-		 * Constructor.
-		 */
-		public function __construct() {
-			$this->id    = WSUID_PAGE_ID;
-			$this->label = __( 'Settings UI Demo', WSUID_TEXT_DOMAIN );
-			$this->icon  = 'admin-customizer';
-
-			parent::__construct();
-		}
-
-		/**
-		 * Opt this settings page into WooCommerce's Settings UI renderer.
-		 *
-		 * WooCommerce only uses this adapter when the settings-ui feature flag is enabled.
-		 *
-		 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
-		 */
-		public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
-			return new WC_Settings_UI_Demo_Page_Adapter( $this );
-		}
-
-		/**
-		 * Get settings for the default section.
-		 *
-		 * @return array<mixed>
-		 */
-		protected function get_settings_for_default_section() {
-			return wsuid_get_demo_settings();
-		}
-	}
+	require_once plugin_dir_path( WSUID_PLUGIN_FILE ) . 'includes/class-wsuid-settings-page-adapter.php';
+	require_once plugin_dir_path( WSUID_PLUGIN_FILE ) . 'includes/class-wsuid-settings-page.php';
 }
 
 /**
@@ -156,21 +85,21 @@ function wsuid_declare_settings_page_classes(): void {
  */
 function wsuid_get_demo_settings(): array {
 	$settings_ui_enabled = 'yes' === get_option( WSUID_FEATURE_OPTION, 'no' );
-	$status_label        = $settings_ui_enabled ? __( 'enabled', WSUID_TEXT_DOMAIN ) : __( 'disabled', WSUID_TEXT_DOMAIN );
+	$status_label        = $settings_ui_enabled ? __( 'enabled', 'woo-settings-ui-demo' ) : __( 'disabled', 'woo-settings-ui-demo' );
 
 	return array(
 		array(
-			'title'   => __( 'Settings UI demo', WSUID_TEXT_DOMAIN ),
+			'title'   => __( 'Settings UI demo', 'woo-settings-ui-demo' ),
 			'type'    => 'title',
 			'desc'    => sprintf(
 				/* translators: %s: WooCommerce Settings UI documentation URL. */
-				__( 'This page uses the normal WooCommerce settings array and save flow. Turn the feature flag on to render this same page with the React Settings UI. <a href="%s" target="_blank" rel="noreferrer noopener">Read the Settings UI docs</a>.', WSUID_TEXT_DOMAIN ),
+				__( 'This page uses the normal WooCommerce settings array and save flow. Turn the feature flag on to render this same page with the React Settings UI. <a href="%s" target="_blank" rel="noreferrer noopener">Read the Settings UI docs</a>.', 'woo-settings-ui-demo' ),
 				esc_url( 'https://developer.woocommerce.com/docs/extensions/settings-and-config/settings-ui/' )
 			),
 			'actions' => array(
 				array(
 					'id'      => 'products-reference',
-					'label'   => __( 'View Products settings', WSUID_TEXT_DOMAIN ),
+					'label'   => __( 'View Products settings', 'woo-settings-ui-demo' ),
 					'href'    => admin_url( 'admin.php?page=wc-settings&tab=products' ),
 					'variant' => 'secondary',
 				),
@@ -178,43 +107,43 @@ function wsuid_get_demo_settings(): array {
 			'id'      => 'wsuid_demo_options',
 		),
 		array(
-			'title'         => __( 'Enable Settings UI renderer', WSUID_TEXT_DOMAIN ),
-			'desc'          => __( 'Render opted-in WooCommerce settings pages with the React Settings UI.', WSUID_TEXT_DOMAIN ),
+			'title'         => __( 'Enable Settings UI renderer', 'woo-settings-ui-demo' ),
+			'desc'          => __( 'Render opted-in WooCommerce settings pages with the React Settings UI.', 'woo-settings-ui-demo' ),
 			'id'            => WSUID_FEATURE_OPTION,
 			'default'       => 'no',
 			'type'          => 'checkbox',
 			'checkboxgroup' => 'start',
 		),
 		array(
-			'desc'          => __( 'Keep saving through the existing WooCommerce settings form flow.', WSUID_TEXT_DOMAIN ),
+			'desc'          => __( 'Keep saving through the existing WooCommerce settings form flow.', 'woo-settings-ui-demo' ),
 			'id'            => 'wsuid_preserve_legacy_save_flow',
 			'default'       => 'yes',
 			'type'          => 'checkbox',
 			'checkboxgroup' => 'end',
 		),
 		array(
-			'title'       => __( 'Storefront message', WSUID_TEXT_DOMAIN ),
-			'desc'        => __( 'A plain text option rendered by native controls in both modes.', WSUID_TEXT_DOMAIN ),
+			'title'       => __( 'Storefront message', 'woo-settings-ui-demo' ),
+			'desc'        => __( 'A plain text option rendered by native controls in both modes.', 'woo-settings-ui-demo' ),
 			'id'          => 'wsuid_storefront_message',
 			'type'        => 'text',
-			'default'     => __( 'Free shipping over $75', WSUID_TEXT_DOMAIN ),
-			'placeholder' => __( 'Example: Free shipping over $75', WSUID_TEXT_DOMAIN ),
+			'default'     => __( 'Free shipping over $75', 'woo-settings-ui-demo' ),
+			'placeholder' => __( 'Example: Free shipping over $75', 'woo-settings-ui-demo' ),
 		),
 		array(
-			'title'   => __( 'Display mode', WSUID_TEXT_DOMAIN ),
-			'desc'    => __( 'A native select field for comparing labels, help text, and saves.', WSUID_TEXT_DOMAIN ),
+			'title'   => __( 'Display mode', 'woo-settings-ui-demo' ),
+			'desc'    => __( 'A native select field for comparing labels, help text, and saves.', 'woo-settings-ui-demo' ),
 			'id'      => 'wsuid_display_mode',
 			'type'    => 'select',
 			'default' => 'compact',
 			'options' => array(
-				'compact'  => __( 'Compact', WSUID_TEXT_DOMAIN ),
-				'balanced' => __( 'Balanced', WSUID_TEXT_DOMAIN ),
-				'detailed' => __( 'Detailed', WSUID_TEXT_DOMAIN ),
+				'compact'  => __( 'Compact', 'woo-settings-ui-demo' ),
+				'balanced' => __( 'Balanced', 'woo-settings-ui-demo' ),
+				'detailed' => __( 'Detailed', 'woo-settings-ui-demo' ),
 			),
 		),
 		array(
-			'title'             => __( 'Reminder delay', WSUID_TEXT_DOMAIN ),
-			'desc'              => __( 'A number field with the same option id in both renderers.', WSUID_TEXT_DOMAIN ),
+			'title'             => __( 'Reminder delay', 'woo-settings-ui-demo' ),
+			'desc'              => __( 'A number field with the same option id in both renderers.', 'woo-settings-ui-demo' ),
 			'id'                => 'wsuid_reminder_delay',
 			'type'              => 'number',
 			'default'           => '3',
@@ -225,44 +154,44 @@ function wsuid_get_demo_settings(): array {
 			),
 		),
 		array(
-			'title'     => __( 'Notification channels', WSUID_TEXT_DOMAIN ),
-			'desc'      => __( 'Legacy mode renders this as a native multiselect. Settings UI mode renders the same saved option with a custom component.', WSUID_TEXT_DOMAIN ),
+			'title'     => __( 'Notification channels', 'woo-settings-ui-demo' ),
+			'desc'      => __( 'Legacy mode renders this as a native multiselect. Settings UI mode renders the same saved option with a custom component.', 'woo-settings-ui-demo' ),
 			'id'        => 'wsuid_notification_channels',
 			'type'      => 'multiselect',
 			'default'   => array( 'email', 'dashboard' ),
 			'component' => 'woo-settings-ui-demo/channel-picker',
 			'options'   => array(
-				'email'     => __( 'Email', WSUID_TEXT_DOMAIN ),
-				'dashboard' => __( 'Dashboard inbox', WSUID_TEXT_DOMAIN ),
-				'sms'       => __( 'SMS', WSUID_TEXT_DOMAIN ),
-				'webhook'   => __( 'Webhook', WSUID_TEXT_DOMAIN ),
+				'email'     => __( 'Email', 'woo-settings-ui-demo' ),
+				'dashboard' => __( 'Dashboard inbox', 'woo-settings-ui-demo' ),
+				'sms'       => __( 'SMS', 'woo-settings-ui-demo' ),
+				'webhook'   => __( 'Webhook', 'woo-settings-ui-demo' ),
 			),
 		),
 		array(
-			'title'       => __( 'Internal notes', WSUID_TEXT_DOMAIN ),
-			'desc'        => __( 'A textarea option for checking multiline values in both renderers.', WSUID_TEXT_DOMAIN ),
+			'title'       => __( 'Internal notes', 'woo-settings-ui-demo' ),
+			'desc'        => __( 'A textarea option for checking multiline values in both renderers.', 'woo-settings-ui-demo' ),
 			'id'          => 'wsuid_internal_notes',
 			'type'        => 'textarea',
 			'default'     => '',
-			'placeholder' => __( 'Add notes for testing save behavior.', WSUID_TEXT_DOMAIN ),
+			'placeholder' => __( 'Add notes for testing save behavior.', 'woo-settings-ui-demo' ),
 		),
 		array(
 			'type' => 'sectionend',
 			'id'   => 'wsuid_demo_options',
 		),
 		array(
-			'title' => __( 'Diagnostics', WSUID_TEXT_DOMAIN ),
+			'title' => __( 'Diagnostics', 'woo-settings-ui-demo' ),
 			'type'  => 'title',
-			'desc'  => __( 'This display-only field uses the Settings UI none save adapter and is ignored by the normal settings save routine.', WSUID_TEXT_DOMAIN ),
+			'desc'  => __( 'This display-only field uses the Settings UI none save adapter and is ignored by the normal settings save routine.', 'woo-settings-ui-demo' ),
 			'id'    => 'wsuid_demo_diagnostics',
 		),
 		array(
-			'title' => __( 'Current renderer state', WSUID_TEXT_DOMAIN ),
+			'title' => __( 'Current renderer state', 'woo-settings-ui-demo' ),
 			'type'  => 'info',
 			'id'    => 'wsuid_renderer_state',
 			'text'  => sprintf(
 				/* translators: %s: enabled or disabled. */
-				__( 'The saved Settings UI feature flag is currently %s.', WSUID_TEXT_DOMAIN ),
+				__( 'The saved Settings UI feature flag is currently %s.', 'woo-settings-ui-demo' ),
 				'<strong>' . esc_html( $status_label ) . '</strong>'
 			),
 			'save'  => array(
@@ -311,8 +240,10 @@ function wsuid_is_demo_settings_screen(): bool {
 		return false;
 	}
 
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only current screen detection.
 	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 	$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 	return 'wc-settings' === $page && WSUID_PAGE_ID === $tab;
 }
@@ -327,6 +258,6 @@ function wsuid_maybe_show_woocommerce_missing_notice(): void {
 
 	printf(
 		'<div class="notice notice-error"><p>%s</p></div>',
-		esc_html__( 'Woo Settings UI Demo requires WooCommerce to be active.', WSUID_TEXT_DOMAIN )
+		esc_html__( 'Woo Settings UI Demo requires WooCommerce to be active.', 'woo-settings-ui-demo' )
 	);
 }
