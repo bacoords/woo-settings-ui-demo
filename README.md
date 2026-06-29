@@ -5,6 +5,7 @@ Tutorial plugin for experimenting with the WooCommerce Settings UI renderer.
 This repository shows how to:
 
 - Add a custom WooCommerce settings tab.
+- Add a section to an existing WooCommerce settings page.
 - Toggle the experimental Settings UI renderer from inside that tab.
 - Reuse the same WooCommerce settings array and save flow in both renderers.
 - Add a custom field in the legacy PHP settings screen.
@@ -53,6 +54,12 @@ Activate the plugin in WordPress, then open:
 WooCommerce > Settings > Settings UI Demo
 ```
 
+The plugin also registers an example section under:
+
+```text
+WooCommerce > Settings > Products > Settings UI Demo
+```
+
 ## Try The Demo
 
 1. Open the `Settings UI Demo` settings tab.
@@ -62,6 +69,8 @@ WooCommerce > Settings > Settings UI Demo
 5. Reload the settings tab.
 
 When the option is enabled, the plugin adds `settings-ui` through the `woocommerce_admin_features` filter. WooCommerce then renders this opted-in page through Settings UI. Disable the same option and save again to return to the legacy renderer.
+
+To compare the registered-section API, open `WooCommerce > Settings > Products > Settings UI Demo`. That section is added to WooCommerce's existing Products settings page rather than creating another top-level settings tab.
 
 ## Tutorial Walkthrough
 
@@ -86,7 +95,26 @@ The page defines two sections in one settings array:
 
 The same settings array feeds both renderers. That keeps option IDs, defaults, and the standard WooCommerce save path consistent.
 
-### 3. Opt Into Settings UI
+### 3. Register A Section Under Products
+
+[includes/class-wsuid-products-section.php](includes/class-wsuid-products-section.php) extends WooCommerce's `SettingsSection` base class.
+
+The section declares:
+
+- Parent page ID: `products`.
+- Section ID: `settings_ui_demo`.
+- Label: `Settings UI Demo`.
+- Settings fields returned from `get_settings()`.
+
+The plugin registers that section through:
+
+```php
+add_action( 'woocommerce_settings_sections_registration', 'wsuid_register_products_settings_section' );
+```
+
+This is the path to use when an extension should add a section to an existing WooCommerce settings page instead of owning a full tab. WooCommerce includes registered sections in the legacy section navigation and adapts them for Settings UI when the feature is enabled.
+
+### 4. Opt Into Settings UI
 
 The settings page implements:
 
@@ -98,7 +126,7 @@ public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\
 
 Returning a `SettingsUIPageInterface` opts the page into the Settings UI renderer when WooCommerce's `settings-ui` feature is enabled.
 
-### 4. Adapt The Legacy Settings Array
+### 5. Adapt The Legacy Settings Array
 
 [includes/class-wsuid-settings-page-adapter.php](includes/class-wsuid-settings-page-adapter.php) extends WooCommerce's `LegacySettingsPageAdapter`.
 
@@ -110,7 +138,7 @@ It customizes the generated schema by:
 
 That last step matters because the legacy renderer uses PHP field types, while Settings UI needs a canonical field type and a React component name.
 
-### 5. Add A Custom Field In Both Renderers
+### 6. Add A Custom Field In Both Renderers
 
 The notification channel setting uses one option ID:
 
@@ -137,7 +165,7 @@ In Settings UI, the adapter keeps the same option ID but changes the schema fiel
 
 The React component is registered in [src/index.js](src/index.js), and implemented in [src/channel-picker.js](src/channel-picker.js).
 
-### 6. Share Sanitization
+### 7. Share Sanitization
 
 Both renderers save `wsuid_notification_channels` through WooCommerce settings saving.
 
@@ -196,6 +224,9 @@ includes/class-wsuid-settings-page.php
 includes/class-wsuid-settings-page-adapter.php
   Settings UI schema adapter and custom component script handle.
 
+includes/class-wsuid-products-section.php
+  Registered section under WooCommerce's existing Products settings page.
+
 includes/class-wsuid-assets.php
   Registers built JS/CSS and the local Settings UI SDK compatibility alias.
 
@@ -221,6 +252,7 @@ composer lint
 php -l woo-settings-ui-demo.php
 php -l includes/class-wsuid-settings-page.php
 php -l includes/class-wsuid-settings-page-adapter.php
+php -l includes/class-wsuid-products-section.php
 php -l includes/class-wsuid-assets.php
 ```
 
@@ -229,3 +261,4 @@ For runtime checks, verify both renderers:
 - With Settings UI disabled, the page uses the legacy WooCommerce settings table.
 - With Settings UI enabled, the page renders through the React Settings UI shell.
 - The notification channel picker saves the same `wsuid_notification_channels` option in both modes.
+- `WooCommerce > Settings > Products > Settings UI Demo` appears as a registered section under Products.

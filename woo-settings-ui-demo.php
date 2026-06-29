@@ -19,6 +19,7 @@ defined( 'ABSPATH' ) || exit;
 define( 'WSUID_VERSION', '0.1.0' );
 define( 'WSUID_PLUGIN_FILE', __FILE__ );
 define( 'WSUID_PAGE_ID', 'settings_ui_demo' );
+define( 'WSUID_PRODUCTS_SECTION_ID', 'settings_ui_demo' );
 define( 'WSUID_FEATURE_OPTION', 'wsuid_enable_settings_ui' );
 define( 'WSUID_SCRIPT_HANDLE', 'woo-settings-ui-demo-settings' );
 define( 'WSUID_STYLE_HANDLE', 'woo-settings-ui-demo-settings' );
@@ -27,6 +28,7 @@ require_once plugin_dir_path( WSUID_PLUGIN_FILE ) . 'includes/class-wsuid-assets
 
 add_filter( 'woocommerce_admin_features', 'wsuid_maybe_enable_settings_ui' );
 add_filter( 'woocommerce_get_settings_pages', 'wsuid_add_settings_page' );
+add_action( 'woocommerce_settings_sections_registration', 'wsuid_register_products_settings_section' );
 add_action( 'admin_enqueue_scripts', array( 'WSUID_Assets', 'register' ) );
 
 /**
@@ -68,4 +70,21 @@ function wsuid_add_settings_page( array $settings_pages ): array {
 	$settings_pages[] = new WSUID_Settings_Page();
 
 	return $settings_pages;
+}
+
+/**
+ * Register a demo section under WooCommerce's existing Products settings page.
+ *
+ * @param \Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry $registry Settings section registry.
+ */
+function wsuid_register_products_settings_section( \Automattic\WooCommerce\Admin\Settings\SettingsSectionRegistry $registry ): void {
+	if ( ! class_exists( '\Automattic\WooCommerce\Admin\Settings\SettingsSection' ) ) {
+		return;
+	}
+
+	if ( ! class_exists( 'WSUID_Products_Section', false ) ) {
+		require_once plugin_dir_path( WSUID_PLUGIN_FILE ) . 'includes/class-wsuid-products-section.php';
+	}
+
+	$registry->register( new WSUID_Products_Section() );
 }
