@@ -1,0 +1,19 @@
+{
+	"name": "woo-settings-ui-demo",
+	"version": "0.1.0",
+	"description": "Demo WooCommerce plugin for the Settings UI renderer.",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"build": "wp-scripts build --config webpack.config.js",
+		"lint": "npm run lint:js",
+		"start": "wp-scripts start --config webpack.config.js",
+		"lint:js": "wp-scripts lint-js src webpack.config.js"
+	},
+	"devDependencies": {
+		"@woocommerce/dependency-extraction-webpack-plugin": "4.0.0",
+		"@wordpress/components": "36.0.0",
+		"@wordpress/i18n": "6.22.0",
+		"@wordpress/scripts": "31.4.0"
+	}
+}

@@ -209,23 +209,31 @@ function wsuid_get_demo_settings(): array {
  * Register assets used by the Settings UI custom component.
  */
 function wsuid_register_settings_ui_assets(): void {
-	$script_path = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.js';
-	$style_path  = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.css';
+	$script_path       = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.js';
+	$script_asset_path = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.asset.php';
+	$script_asset      = file_exists( $script_asset_path )
+		? require $script_asset_path
+		: array(
+			'dependencies' => array( 'wc-settings-ui', 'wp-components', 'wp-element', 'wp-i18n' ),
+			'version'      => file_exists( $script_path ) ? (string) filemtime( $script_path ) : WSUID_VERSION,
+		);
+	$style_path        = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/style-settings-ui-demo.css';
 
 	wp_register_script(
 		WSUID_SCRIPT_HANDLE,
 		plugins_url( 'assets/settings-ui-demo.js', WSUID_PLUGIN_FILE ),
-		array( 'wc-settings-ui', 'wp-components', 'wp-element', 'wp-i18n' ),
-		file_exists( $script_path ) ? (string) filemtime( $script_path ) : WSUID_VERSION,
+		is_array( $script_asset['dependencies'] ?? null ) ? $script_asset['dependencies'] : array(),
+		is_string( $script_asset['version'] ?? null ) ? $script_asset['version'] : WSUID_VERSION,
 		true
 	);
 
 	wp_register_style(
 		WSUID_STYLE_HANDLE,
-		plugins_url( 'assets/settings-ui-demo.css', WSUID_PLUGIN_FILE ),
+		plugins_url( 'assets/style-settings-ui-demo.css', WSUID_PLUGIN_FILE ),
 		array(),
 		file_exists( $style_path ) ? (string) filemtime( $style_path ) : WSUID_VERSION
 	);
+	wp_style_add_data( WSUID_STYLE_HANDLE, 'rtl', 'replace' );
 
 	if ( wsuid_is_demo_settings_screen() ) {
 		wp_enqueue_style( WSUID_STYLE_HANDLE );
