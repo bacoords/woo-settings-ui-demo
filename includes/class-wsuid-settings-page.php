@@ -135,9 +135,6 @@ class WSUID_Settings_Page extends WC_Settings_Page {
 	 * @return array<mixed>
 	 */
 	protected function get_settings_for_default_section() {
-		$settings_ui_enabled = 'yes' === get_option( WSUID_FEATURE_OPTION, 'no' );
-		$status_label        = $settings_ui_enabled ? __( 'enabled', 'woo-settings-ui-demo' ) : __( 'disabled', 'woo-settings-ui-demo' );
-
 		return array(
 			array(
 				'title'   => __( 'Settings UI demo', 'woo-settings-ui-demo' ),
@@ -231,29 +228,6 @@ class WSUID_Settings_Page extends WC_Settings_Page {
 			array(
 				'type' => 'sectionend',
 				'id'   => 'wsuid_demo_fields',
-			),
-			array(
-				'title' => __( 'Diagnostics', 'woo-settings-ui-demo' ),
-				'type'  => 'title',
-				'desc'  => __( 'This display-only field uses the Settings UI none save adapter and is ignored by the normal settings save routine.', 'woo-settings-ui-demo' ),
-				'id'    => 'wsuid_demo_diagnostics',
-			),
-			array(
-				'title' => __( 'Current renderer state', 'woo-settings-ui-demo' ),
-				'type'  => 'info',
-				'id'    => 'wsuid_renderer_state',
-				'text'  => sprintf(
-					/* translators: %s: enabled or disabled. */
-					__( 'The saved Settings UI feature flag is currently %s.', 'woo-settings-ui-demo' ),
-					'<strong>' . esc_html( $status_label ) . '</strong>'
-				),
-				'save'  => array(
-					'adapter' => 'none',
-				),
-			),
-			array(
-				'type' => 'sectionend',
-				'id'   => 'wsuid_demo_diagnostics',
 			),
 		);
 	}

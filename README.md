@@ -79,11 +79,10 @@ The main file intentionally stays small so the settings-page behavior lives with
 
 [includes/class-wsuid-settings-page.php](includes/class-wsuid-settings-page.php) extends `WC_Settings_Page`.
 
-The page defines three sections in one settings array:
+The page defines two sections in one settings array:
 
 - `wsuid_demo_options`: the renderer toggle.
 - `wsuid_demo_fields`: example settings fields.
-- `wsuid_demo_diagnostics`: display-only state output.
 
 The same settings array feeds both renderers. That keeps option IDs, defaults, and the standard WooCommerce save path consistent.
 
