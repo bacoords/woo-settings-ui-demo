@@ -211,19 +211,19 @@ function wsuid_get_demo_settings(): array {
 function wsuid_register_settings_ui_assets(): void {
 	wsuid_register_settings_ui_sdk_alias();
 
-	$script_path       = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.js';
-	$script_asset_path = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.asset.php';
+	$script_path       = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'build/index.js';
+	$script_asset_path = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'build/index.asset.php';
 	$script_asset      = file_exists( $script_asset_path )
 		? require $script_asset_path
 		: array(
-			'dependencies' => array( 'wc-settings-ui', 'wp-components', 'wp-element', 'wp-i18n' ),
+			'dependencies' => array( 'react-jsx-runtime', 'wc-settings-ui-sdk', 'wp-components', 'wp-i18n' ),
 			'version'      => file_exists( $script_path ) ? (string) filemtime( $script_path ) : WSUID_VERSION,
 		);
-	$style_path        = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/style-settings-ui-demo.css';
+	$style_path        = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'build/style-index.css';
 
 	wp_register_script(
 		WSUID_SCRIPT_HANDLE,
-		plugins_url( 'assets/settings-ui-demo.js', WSUID_PLUGIN_FILE ),
+		plugins_url( 'build/index.js', WSUID_PLUGIN_FILE ),
 		is_array( $script_asset['dependencies'] ?? null ) ? $script_asset['dependencies'] : array(),
 		is_string( $script_asset['version'] ?? null ) ? $script_asset['version'] : WSUID_VERSION,
 		true
@@ -231,7 +231,7 @@ function wsuid_register_settings_ui_assets(): void {
 
 	wp_register_style(
 		WSUID_STYLE_HANDLE,
-		plugins_url( 'assets/style-settings-ui-demo.css', WSUID_PLUGIN_FILE ),
+		plugins_url( 'build/style-index.css', WSUID_PLUGIN_FILE ),
 		array(),
 		file_exists( $style_path ) ? (string) filemtime( $style_path ) : WSUID_VERSION
 	);
