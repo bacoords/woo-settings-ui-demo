@@ -209,6 +209,8 @@ function wsuid_get_demo_settings(): array {
  * Register assets used by the Settings UI custom component.
  */
 function wsuid_register_settings_ui_assets(): void {
+	wsuid_register_settings_ui_sdk_alias();
+
 	$script_path       = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.js';
 	$script_asset_path = plugin_dir_path( WSUID_PLUGIN_FILE ) . 'assets/settings-ui-demo.asset.php';
 	$script_asset      = file_exists( $script_asset_path )
@@ -238,6 +240,32 @@ function wsuid_register_settings_ui_assets(): void {
 	if ( wsuid_is_demo_settings_screen() ) {
 		wp_enqueue_style( WSUID_STYLE_HANDLE );
 	}
+}
+
+/**
+ * Register a compatibility alias for the Settings UI SDK script handle.
+ *
+ * The current dependency extraction package maps @woocommerce/settings-ui-sdk
+ * to wc-settings-ui-sdk. WooCommerce 10.9.x still exposes this API through the
+ * wc-settings-ui handle and window.wc.settingsUi.
+ */
+function wsuid_register_settings_ui_sdk_alias(): void {
+	if ( wp_script_is( 'wc-settings-ui-sdk', 'registered' ) ) {
+		return;
+	}
+
+	wp_register_script(
+		'wc-settings-ui-sdk',
+		false,
+		array( 'wc-settings-ui' ),
+		WSUID_VERSION,
+		true
+	);
+	wp_add_inline_script(
+		'wc-settings-ui-sdk',
+		'window.wc = window.wc || {}; window.wc.settingsUiSdk = window.wc.settingsUiSdk || window.wc.settingsUi;',
+		'after'
+	);
 }
 
 /**

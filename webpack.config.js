@@ -2,8 +2,6 @@ const path = require( 'path' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 
-const settingsUIRequest = '@woocommerce/settings-ui';
-
 module.exports = {
 	...defaultConfig,
 	entry: {
@@ -22,17 +20,6 @@ module.exports = {
 			( plugin ) =>
 				plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
 		),
-		new WooCommerceDependencyExtractionWebpackPlugin( {
-			requestToExternal( request ) {
-				if ( settingsUIRequest === request ) {
-					return [ 'wc', 'settingsUi' ];
-				}
-			},
-			requestToHandle( request ) {
-				if ( settingsUIRequest === request ) {
-					return 'wc-settings-ui';
-				}
-			},
-		} ),
+		new WooCommerceDependencyExtractionWebpackPlugin(),
 	],
 };
