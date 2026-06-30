@@ -1,4 +1,4 @@
-import { registerSettingsExtension } from '@woocommerce/settings-ui-sdk';
+import { registerSettingsExtension } from '@woocommerce/settings-ui';
 
 import { ChannelPicker } from './channel-picker';
 import './style.css';

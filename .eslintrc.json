@@ -1,6 +1,6 @@
 {
 	"extends": [ "plugin:@wordpress/eslint-plugin/recommended" ],
 	"settings": {
-		"import/core-modules": [ "@woocommerce/settings-ui-sdk" ]
+		"import/core-modules": [ "@woocommerce/settings-ui" ]
 	}
 }
