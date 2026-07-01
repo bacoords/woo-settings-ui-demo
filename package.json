@@ -11,7 +11,7 @@
 		"lint:js": "wp-scripts lint-js src webpack.config.js"
 	},
 	"devDependencies": {
-		"@woocommerce/dependency-extraction-webpack-plugin": "5.0.0",
+		"@woocommerce/dependency-extraction-webpack-plugin": "5.1.0",
 		"@wordpress/components": "36.0.0",
 		"@wordpress/i18n": "6.22.0",
 		"@wordpress/scripts": "31.4.0"
